@@ -74,8 +74,8 @@ namespace DemoApplication.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            if (ModelState.IsValid)
-            {
+            //if (ModelState.IsValid)
+            //{
                 // Check if username already exists
                 if (await _context.Users.AnyAsync(u => u.Username == model.Username))
                 {
@@ -114,10 +114,10 @@ namespace DemoApplication.Controllers
                 _logger.LogInformation($"User created: {user.Username} (ID: {user.UserId}) by admin");
                 TempData["SuccessMessage"] = $"User '{user.FullName}' created successfully!";
                 return RedirectToAction("Users");
-            }
+            //}
 
-            model.UserGroups = await _context.UserGroups.ToListAsync();
-            return View(model);
+            //model.UserGroups = await _context.UserGroups.ToListAsync();
+            //return View(model);
         }
 
         // GET: /UserManagement/EditUser/5
@@ -171,8 +171,8 @@ namespace DemoApplication.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
-            {
+            //if (ModelState.IsValid)
+            //{
                 var user = await _context.Users.FindAsync(id);
                 if (user == null)
                 {
@@ -225,10 +225,10 @@ namespace DemoApplication.Controllers
                     }
                 }
                 return RedirectToAction("Users");
-            }
+            //}
 
-            model.UserGroups = await _context.UserGroups.ToListAsync();
-            return View(model);
+            //model.UserGroups = await _context.UserGroups.ToListAsync();
+            //return View(model);
         }
 
         // GET: /UserManagement/DeleteUser/5
