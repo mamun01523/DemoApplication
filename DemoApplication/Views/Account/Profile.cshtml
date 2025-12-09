@@ -1,0 +1,53 @@
+﻿@model DemoApplication.Models.UserAccount.User
+
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card mt-5">
+            <div class="card-header">
+                <h3 class="text-center">User Profile</h3>
+            </div>
+            <div class="card-body">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                }
+
+                <dl class="row">
+                    <dt class="col-sm-3">Full Name:</dt>
+                    <dd class="col-sm-9">@Model.FullName</dd>
+
+                    <dt class="col-sm-3">Username:</dt>
+                    <dd class="col-sm-9">@Model.Username</dd>
+
+                    <dt class="col-sm-3">Email:</dt>
+                    <dd class="col-sm-9">@Model.Email</dd>
+
+                    <dt class="col-sm-3">Phone Number:</dt>
+                    <dd class="col-sm-9">@Model.PhoneNo</dd>
+
+                    <dt class="col-sm-3">User Group:</dt>
+                    <dd class="col-sm-9">@Model.UserGroup.UserGroupName</dd>
+
+                    @* <dt class="col-sm-3">Account Created:</dt>
+                    <dd class="col-sm-9">@Model.CreatedDate.ToString("dd/MM/yyyy")</dd> *@
+
+                    <dt class="col-sm-3">Account Status:</dt>
+                    <dd class="col-sm-9">
+                        <span class="badge bg-@(Model.IsActive ? "success" : "danger")">
+                            @(Model.IsActive ? "Active" : "Inactive")
+                        </span>
+                    </dd>
+                </dl>
+
+                <div class="mt-4">
+                    <a asp-action="ChangePassword" class="btn btn-primary">Change Password</a>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

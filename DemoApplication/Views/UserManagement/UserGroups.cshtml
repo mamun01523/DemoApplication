@@ -1,0 +1,108 @@
+﻿@model List<DemoApplication.Models.UserAccount.LkpUserGroup>
+
+@{
+    ViewData["Title"] = "User Group Management";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>User Group Management</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Users">Users</a></li>
+                    <li class="breadcrumb-item active">User Groups</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-auto">
+            <a asp-action="CreateUserGroup" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add New User Group
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">All User Groups</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Group Name</th>
+                            <th>Number of Users</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var group in Model)
+                        {
+                            <tr>
+                                <td>@group.UserGroupId</td>
+                                <td>
+                                    @group.UserGroupName
+                                    @if (group.UserGroupId <= 2)
+                                    {
+                                        <span class="badge bg-secondary ms-2">Default</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">@group.Users?.Count</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        @if (group.UserGroupId > 2) // Only allow edit/delete for non-default groups
+                                        {
+                                            <a asp-action="EditUserGroup" asp-route-id="@group.UserGroupId" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-action="DeleteUserGroup" asp-route-id="@group.UserGroupId" class="btn btn-sm btn-outline-danger" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">System Group</span>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="row">
+                <div class="col">
+                    <small class="text-muted">Total Groups: @Model.Count</small>
+                </div>
+                <div class="col-auto">
+                    <a asp-action="Users" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Users
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

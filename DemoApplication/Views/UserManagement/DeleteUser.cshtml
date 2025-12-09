@@ -1,0 +1,52 @@
+﻿@model DemoApplication.Models.UserAccount.User
+
+@{
+    ViewData["Title"] = "Deactivate User";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card mt-4">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="bi bi-person-x"></i> Deactivate User</h4>
+            </div>
+            <div class="card-body">
+                <h5 class="text-danger">Are you sure you want to deactivate this user?</h5>
+
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> This action will deactivate the user account. The user will no longer be able to login.
+                </div>
+
+                <dl class="row">
+                    <dt class="col-sm-4">Full Name:</dt>
+                    <dd class="col-sm-8">@Model.FullName</dd>
+
+                    <dt class="col-sm-4">Username:</dt>
+                    <dd class="col-sm-8">@Model.Username</dd>
+
+                    <dt class="col-sm-4">Email:</dt>
+                    <dd class="col-sm-8">@Model.Email</dd>
+
+                    <dt class="col-sm-4">User Group:</dt>
+                    <dd class="col-sm-8">@Model.UserGroup.UserGroupName</dd>
+
+                    <dt class="col-sm-4">Account Status:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-success">Active</span>
+                    </dd>
+                </dl>
+
+                <form asp-action="DeleteUser" method="post">
+                    <input type="hidden" asp-for="UserId" />
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Users" class="btn btn-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-person-x"></i> Yes, Deactivate User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

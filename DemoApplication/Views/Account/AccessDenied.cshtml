@@ -1,0 +1,37 @@
+﻿@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card mt-5">
+            <div class="card-header bg-danger text-white">
+                <h3 class="text-center">Access Denied</h3>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <i class="bi bi-shield-exclamation" style="font-size: 4rem; color: #dc3545;"></i>
+                </div>
+
+                <h4 class="mb-3">You don't have permission to access this page.</h4>
+
+                <p class="mb-4">
+                    This page requires administrator privileges.
+                    Please contact your system administrator if you believe you should have access.
+                </p>
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-warning">
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
+
+                <div class="mt-4">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Go to Home</a>
+                    <a asp-controller="Account" asp-action="Logout" class="btn btn-secondary">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

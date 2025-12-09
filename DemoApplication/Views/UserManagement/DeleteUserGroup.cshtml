@@ -1,0 +1,60 @@
+﻿@model DemoApplication.Models.UserAccount.LkpUserGroup
+
+@{
+    ViewData["Title"] = "Delete User Group";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card mt-4">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="bi bi-trash"></i> Delete User Group</h4>
+            </div>
+            <div class="card-body">
+                <h5 class="text-danger">Are you sure you want to delete this user group?</h5>
+
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> This action cannot be undone. Make sure no users are assigned to this group.
+                </div>
+
+                <dl class="row">
+                    <dt class="col-sm-4">Group ID:</dt>
+                    <dd class="col-sm-8">@Model.UserGroupId</dd>
+
+                    <dt class="col-sm-4">Group Name:</dt>
+                    <dd class="col-sm-8">@Model.UserGroupName</dd>
+
+                    <dt class="col-sm-4">Number of Users:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-primary">@Model.Users?.Count</span>
+                    </dd>
+                </dl>
+
+                @if (Model.Users != null && Model.Users.Any())
+                {
+                    <div class="alert alert-danger">
+                        <i class="bi bi-x-circle"></i> Cannot delete this group because it has users assigned.
+                        Please reassign all users to another group first.
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a asp-action="UserGroups" class="btn btn-secondary">Back to Groups</a>
+                    </div>
+                }
+                else
+                {
+                    <form asp-action="DeleteUserGroup" method="post">
+                        <input type="hidden" asp-for="UserGroupId" />
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="UserGroups" class="btn btn-secondary me-md-2">Cancel</a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Yes, Delete Group
+                            </button>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>

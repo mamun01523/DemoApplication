@@ -1,0 +1,41 @@
+﻿@model DemoApplication.ViewModels.UserGroupViewModel
+
+@{
+    ViewData["Title"] = "Edit User Group";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-pencil"></i> Edit User Group</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="EditUserGroup" method="post">
+                    <input type="hidden" asp-for="UserGroupId" />
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="UserGroupName" class="form-label"></label>
+                        <input asp-for="UserGroupName" class="form-control" />
+                        <span asp-validation-for="UserGroupName" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a asp-action="UserGroups" class="btn btn-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Update Group
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

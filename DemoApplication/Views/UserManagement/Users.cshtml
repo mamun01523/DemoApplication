@@ -1,0 +1,140 @@
+﻿@model List<DemoApplication.Models.UserAccount.User>
+
+@{
+    ViewData["Title"] = "User Management";
+    var currentUserId = Context.Session.GetInt32("UserId");
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>User Management</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item active">Users</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-auto">
+            <a asp-action="CreateUser" class="btn btn-primary">
+                <i class="bi bi-person-plus"></i> Add New User
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">All Users</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Full Name</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>User Group</th>
+                            <th>Status</th>
+                            <th>Created Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td>@user.UserId</td>
+                                <td>@user.FullName</td>
+                                <td>@user.Username</td>
+                                <td>@user.Email</td>
+                                <td>
+                                    <span class="badge bg-info">@user.UserGroup?.UserGroupName</span>
+                                </td>
+                                <td>
+                                    @if (user.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Inactive</span>
+                                    }
+                                </td>
+                                <td>@user.CreatedDate?.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="EditUser" asp-route-id="@user.UserId" class="btn btn-sm btn-outline-primary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+
+                                        @if (user.IsActive)
+                                        {
+                                            <a asp-action="ResetUserPassword" asp-route-id="@user.UserId" class="btn btn-sm btn-outline-warning" title="Reset Password">
+                                                <i class="bi bi-key"></i>
+                                            </a>
+
+                                            @if (user.UserId != currentUserId)
+                                            {
+                                                <a asp-action="DeleteUser" asp-route-id="@user.UserId" class="btn btn-sm btn-outline-danger" title="Deactivate">
+                                                    <i class="bi bi-person-x"></i>
+                                                </a>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <a asp-action="ActivateUser" asp-route-id="@user.UserId" class="btn btn-sm btn-outline-success" title="Activate">
+                                                <i class="bi bi-person-check"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="row">
+                <div class="col">
+                    <small class="text-muted">Total Users: @Model.Count</small>
+                </div>
+                <div class="col-auto">
+                    <a asp-action="UserGroups" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-people"></i> Manage User Groups
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        });
+    </script>
+}
