@@ -15,9 +15,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Views\UserManagement\UserGroup\" />
-    <Folder Include="Views\UserManagement\Users\" />
-  </ItemGroup>
-
 </Project>

@@ -13,6 +13,8 @@ namespace DemoApplication.DemoDbContextClasses
         }
         public DbSet<User> Users { get; set; }
         public DbSet<LkpUserGroup> UserGroups { get; set; }
+        public DbSet<UserLog> UserLogs { get; set; }
+        public DbSet<Feedback> Feedbacks { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -22,6 +24,20 @@ namespace DemoApplication.DemoDbContextClasses
                 .HasOne(u => u.UserGroup)
                 .WithMany(g => g.Users)
                 .HasForeignKey(u => u.UserGroupId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            // Configure relationships
+            modelBuilder.Entity<UserLog>()
+                .HasOne(ul => ul.User)
+                .WithMany()
+                .HasForeignKey(ul => ul.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Feedback>()
+                .HasOne(f => f.User)
+                .WithMany()
+                .HasForeignKey(f => f.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             /*

@@ -15,16 +15,17 @@ namespace DemoApplication.Controllers
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
         private readonly ILogger<AccountController> _logger;
+        private readonly IUserLogService _userLogService; // Add this
 
 
-        public AccountController(DemoDbContext context, IConfiguration configuration, IEmailService emailService, ILogger<AccountController> logger)
-        //public AccountController(DemoDbContext context, IConfiguration configuration, ILogger<AccountController> logger)
+        public AccountController(DemoDbContext context, IConfiguration configuration, IEmailService emailService, ILogger<AccountController> logger, IUserLogService userLogService)
+
         {
             _context = context;
             _configuration = configuration;
-            //new
             _emailService = emailService;
             _logger = logger;
+            _userLogService = userLogService; // Add this
         }
 
        
@@ -57,6 +58,9 @@ namespace DemoApplication.Controllers
                     HttpContext.Session.SetInt32(SessionHelper.UserGroupId, user.UserGroupId);
                     HttpContext.Session.SetString(SessionHelper.UserGroupName, user.UserGroup.UserGroupName);
                     HttpContext.Session.SetString(SessionHelper.Email, user.Email);
+
+                    // Log user login
+                    await _userLogService.LogLoginAsync(user.UserId, HttpContext);
 
                     // Set cookie for remember me
                     if (model.RememberMe)
@@ -93,8 +97,8 @@ namespace DemoApplication.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegistrationViewModel model)
         {
-            //if (ModelState.IsValid)
-            //{
+            
+            
                 // Check if username already exists
                 if (await _context.Users.AnyAsync(u => u.Username == model.Username))
                 {
@@ -132,10 +136,10 @@ namespace DemoApplication.Controllers
 
                 TempData["SuccessMessage"] = "Registration successful! Please login.";
                 return RedirectToAction("Login");
-            //}
+           
 
-            model.UserGroups = await _context.UserGroups.ToListAsync();
-            return View(model);
+            //model.UserGroups = await _context.UserGroups.ToListAsync();
+            //return View(model);
         }
 
         // GET: /Account/ForgotPassword
@@ -309,9 +313,25 @@ namespace DemoApplication.Controllers
             return View(user);
         }
 
+        //// GET: /Account/Logout
+        //public IActionResult Logout()
+        //{
+        //    HttpContext.Session.Clear();
+        //    Response.Cookies.Delete("RememberMe");
+        //    return RedirectToAction("Login");
+        //}
+
         // GET: /Account/Logout
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
+            var userId = HttpContext.Session.GetInt32(SessionHelper.UserId);
+
+            if (userId.HasValue)
+            {
+                // Log user logout
+                await _userLogService.LogLogoutAsync(userId.Value);
+            }
+
             HttpContext.Session.Clear();
             Response.Cookies.Delete("RememberMe");
             return RedirectToAction("Login");

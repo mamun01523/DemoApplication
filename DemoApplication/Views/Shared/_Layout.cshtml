@@ -28,6 +28,11 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Account" asp-action="ChangePassword">Change Password</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Feedback" asp-action="Create">
+                                    <i class="bi bi-chat-left-text"></i> Feedback
+                                </a>
+                            </li>
                             @if (Context.Session.GetInt32("UserGroupId") == 1) // Admin only
                             {
                                 <li class="nav-item dropdown">
@@ -48,6 +53,16 @@
                                         </li>
                                         <li>
                                             <a class="dropdown-item" asp-controller="Account" asp-action="Register">Register</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="UserLog" asp-action="Index">
+                                                <i class="bi bi-clock-history"></i> User Activity Logs
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Feedback" asp-action="AdminList">
+                                                <i class="bi bi-chat-dots"></i> Feedback Management
+                                            </a>
                                         </li>
                                     </ul>
                                 </li>

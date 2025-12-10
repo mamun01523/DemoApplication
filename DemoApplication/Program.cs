@@ -15,6 +15,12 @@ builder.Services.AddDbContext<DemoDbContext>(options =>
 // Add Email Service
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+// Add User Log Service
+builder.Services.AddScoped<IUserLogService, UserLogService>();
+
+// Add HttpContextAccessor
+builder.Services.AddHttpContextAccessor();
+
 // Add session
 builder.Services.AddSession(options =>
 {
