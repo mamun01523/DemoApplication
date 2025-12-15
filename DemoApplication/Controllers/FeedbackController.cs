@@ -95,6 +95,7 @@ namespace DemoApplication.Controllers
             }
 
             var feedbacks = await _context.Feedbacks
+                .Include(f => f.User)  // Add this line to include User data
                 .Where(f => f.UserId == userId)
                 .OrderByDescending(f => f.CreatedDate)
                 .ToListAsync();
@@ -243,6 +244,28 @@ namespace DemoApplication.Controllers
 
             TempData["SuccessMessage"] = "Feedback deleted successfully.";
             return RedirectToAction("AdminList");
+        }
+
+        // POST: /Feedback/MarkAsRead (Admin only)
+        [HttpPost]
+        public async Task<IActionResult> MarkAsRead(int id)
+        {
+            if (!IsAdmin())
+            {
+                return Json(new { success = false, message = "Access denied" });
+            }
+
+            var feedback = await _context.Feedbacks.FindAsync(id);
+            if (feedback == null)
+            {
+                return Json(new { success = false, message = "Feedback not found" });
+            }
+
+            feedback.IsRead = true;
+            _context.Update(feedback);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
         }
     }
 }

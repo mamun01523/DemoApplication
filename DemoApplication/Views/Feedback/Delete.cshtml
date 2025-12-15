@@ -1,0 +1,218 @@
+﻿@model DemoApplication.Models.UserAccount.Feedback
+
+@{
+    ViewData["Title"] = "Delete Feedback";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card mt-4">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="bi bi-trash"></i> Delete Feedback</h4>
+            </div>
+            <div class="card-body">
+                <h5 class="text-danger">Are you sure you want to delete this feedback?</h5>
+
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Warning:</strong> This action cannot be undone.
+                    The feedback and any associated images will be permanently deleted.
+                </div>
+
+                <!-- Feedback Details -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Feedback Details</h6>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-sm-3">Feedback ID:</dt>
+                            <dd class="col-sm-9">@Model.FeedbackId</dd>
+
+                            <dt class="col-sm-3">Submitted By:</dt>
+                            <dd class="col-sm-9">
+                                @Model.User?.FullName (@Model.User?.Username)<br />
+                                <small class="text-muted">@Model.User?.Email</small>
+                            </dd>
+
+                            <dt class="col-sm-3">Subject:</dt>
+                            <dd class="col-sm-9">@Model.Subject</dd>
+
+                            <dt class="col-sm-3">Message:</dt>
+                            <dd class="col-sm-9">
+                                @if (Model.Message.Length > 150)
+                                {
+                                    @Model.Message.Substring(0, 150) <text>...</text>
+                                }
+                                else
+                                {
+                                    @Model.Message
+                                }
+                            </dd>
+
+                            <dt class="col-sm-3">Submitted On:</dt>
+                            <dd class="col-sm-9">@Model.CreatedDate.ToString("dd MMMM yyyy hh:mm tt")</dd>
+
+                            <dt class="col-sm-3">Status:</dt>
+                            <dd class="col-sm-9">
+                                @if (Model.IsRead)
+                                {
+                                    <span class="badge bg-success">Read</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Unread</span>
+                                }
+                            </dd>
+
+                            <dt class="col-sm-3">Image Attachment:</dt>
+                            <dd class="col-sm-9">
+                                @if (!string.IsNullOrEmpty(Model.ImagePath))
+                                {
+                                    <span class="badge bg-info">Yes</span>
+                                    <small class="text-muted">Image will also be deleted</small>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">None</span>
+                                }
+                            </dd>
+                        </dl>
+
+                        <!-- Show image preview if exists -->
+                        @if (!string.IsNullOrEmpty(Model.ImagePath))
+                        {
+                            <div class="mt-3">
+                                <h6>Attached Image:</h6>
+                                <div class="text-center">
+                                    <img src="@Model.ImagePath"
+                                         alt="Feedback Attachment"
+                                         class="img-thumbnail"
+                                         style="max-height: 200px;" />
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Admin Notes (if any) -->
+                @if (!string.IsNullOrEmpty(Model.AdminNotes))
+                {
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Admin Notes</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">@Model.AdminNotes</p>
+                        </div>
+                    </div>
+                }
+
+                <!-- Confirmation Form -->
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" asp-for="FeedbackId" />
+
+                    <!-- Reason for deletion (optional) -->
+                    <div class="mb-3">
+                        <label class="form-label">Reason for Deletion (Optional)</label>
+                        <textarea name="deletionReason"
+                                  class="form-control"
+                                  rows="3"
+                                  placeholder="Enter reason for deletion..."></textarea>
+                        <div class="form-text">This will be logged for audit purposes.</div>
+                    </div>
+
+                    <!-- Confirmation checkbox -->
+                    <div class="form-check mb-4">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="confirmDelete"
+                               required />
+                        <label class="form-check-label text-danger" for="confirmDelete">
+                            <strong>I understand this action cannot be undone and I want to proceed with deletion.</strong>
+                        </label>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="AdminList" class="btn btn-secondary me-md-2">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger" id="deleteButton" disabled>
+                            <i class="bi bi-trash"></i> Yes, Delete Permanently
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Audit Trail Info -->
+            <div class="card-footer text-muted">
+                <small>
+                    <i class="bi bi-info-circle"></i>
+                    This action will be logged in the audit trail.
+                    Deletion performed by: @Context.Session.GetString("Username")
+                    on @DateTime.Now.ToString("dd MMM yyyy HH:mm")
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Enable/disable delete button based on checkbox
+            $('#confirmDelete').change(function() {
+                $('#deleteButton').prop('disabled', !this.checked);
+            });
+
+            // Confirmation before submission
+            $('form').submit(function(e) {
+                if (!confirm('Are you absolutely sure you want to delete this feedback? This action cannot be undone.')) {
+                    e.preventDefault();
+                    return false;
+                }
+                return true;
+            });
+
+            // Add visual feedback for checkbox
+            $('#confirmDelete').on('change', function() {
+                if (this.checked) {
+                    $(this).addClass('border-success');
+                    $(this).parent().addClass('text-success');
+                } else {
+                    $(this).removeClass('border-success');
+                    $(this).parent().removeClass('text-success');
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .card {
+            border: 1px solid #dee2e6;
+        }
+
+        .card-header {
+            border-bottom: 1px solid rgba(0,0,0,.125);
+        }
+
+        dl.row dt {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        dl.row dd {
+            color: #6c757d;
+        }
+
+        .form-check-input:checked {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        #deleteButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+}

@@ -36,7 +36,7 @@ namespace DemoApplication.Models.UserAccount
 
         [Column("admin_notes")]
         [MaxLength(1000)]
-        public string AdminNotes { get; set; }
+        public string? AdminNotes { get; set; }
 
         // Navigation property
         [ForeignKey("UserId")]

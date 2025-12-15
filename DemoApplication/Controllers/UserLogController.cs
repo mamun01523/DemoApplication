@@ -27,7 +27,7 @@ namespace DemoApplication.Controllers
         }
 
         // GET: /UserLog/Index (Admin only)
-        public async Task<IActionResult> Index(DateTime? startDate, DateTime? endDate, int? userId)
+        public async Task<IActionResult> UserLog(DateTime? startDate, DateTime? endDate, int? userId)
         {
             if (!IsAdmin())
             {
@@ -150,11 +150,17 @@ namespace DemoApplication.Controllers
                 .Where(l => l.LoginTime < cutoffDate)
                 .ToListAsync();
 
+            if (!oldLogs.Any())
+            {
+                TempData["InfoMessage"] = $"No log entries older than {daysToKeep} days were found.";
+                return RedirectToAction("UserLog");
+            }
+
             _context.UserLogs.RemoveRange(oldLogs);
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = $"Cleared {oldLogs.Count} log entries older than {daysToKeep} days.";
-            return RedirectToAction("Index");
+            return RedirectToAction("UserLog");
         }
     }
 }

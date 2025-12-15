@@ -1,0 +1,339 @@
+﻿@model DemoApplication.Models.UserAccount.Feedback
+
+@{
+    ViewData["Title"] = "Feedback Details";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="bi bi-chat-left-text-fill"></i> Feedback Details</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Feedback" asp-action="AdminList">Feedback Management</a></li>
+                    <li class="breadcrumb-item active">Details</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-auto">
+            <a asp-action="AdminList" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Feedback Details -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header @(Model.IsRead ? "bg-success text-white" : "bg-warning text-dark")">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Feedback #@Model.FeedbackId</h5>
+                        <div>
+                            <span class="badge @(Model.IsRead ? "bg-light text-dark" : "bg-danger")">
+                                @(Model.IsRead ? "READ" : "UNREAD")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- User Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-person"></i> Submitted By</h6>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5>@Model.User?.FullName</h5>
+                                    <p class="mb-1">
+                                        <i class="bi bi-person-badge"></i> @Model.User?.Username
+                                    </p>
+                                    <p class="mb-1">
+                                        <i class="bi bi-envelope"></i> @Model.User?.Email
+                                    </p>
+                                    <p class="mb-0">
+                                        <i class="bi bi-telephone"></i> @(Model.User?.PhoneNo ?? "N/A")
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-calendar"></i> Submission Details</h6>
+                            <div class="card">
+                                <div class="card-body">
+                                    <p class="mb-1">
+                                        <strong>Date:</strong> @Model.CreatedDate.ToString("dd MMMM yyyy")
+                                    </p>
+                                    <p class="mb-1">
+                                        <strong>Time:</strong> @Model.CreatedDate.ToString("hh:mm tt")
+                                    </p>
+                                    <p class="mb-1">
+                                        <strong>Status:</strong>
+                                        @if (Model.IsRead)
+                                        {
+                                            <span class="badge bg-success">Reviewed</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">Pending Review</span>
+                                        }
+                                    </p>
+                                    <p class="mb-0">
+                                        <strong>Feedback ID:</strong> @Model.FeedbackId
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feedback Content -->
+                    <div class="mb-4">
+                        <h6><i class="bi bi-chat-left-text"></i> Feedback Content</h6>
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">@Model.Subject</h5>
+                                <div class="feedback-message">
+                                    @Html.Raw(Model.Message.Replace("\n", "<br>"))
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image Attachment -->
+                    @if (!string.IsNullOrEmpty(Model.ImagePath))
+                    {
+                        <div class="mb-4">
+                            <h6><i class="bi bi-image"></i> Attached Image</h6>
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <img src="@Model.ImagePath"
+                                         alt="Feedback Attachment"
+                                         class="img-fluid rounded"
+                                         style="max-height: 400px; max-width: 100%;" />
+                                    <div class="mt-3">
+                                        <a href="@Model.ImagePath"
+                                           target="_blank"
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-arrows-fullscreen"></i> View Full Size
+                                        </a>
+                                        <a href="@Model.ImagePath"
+                                           download
+                                           class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-download"></i> Download
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Admin Notes -->
+                    <div>
+                        <h6><i class="bi bi-chat-right-text"></i> Admin Notes</h6>
+                        <div class="card">
+                            <div class="card-body">
+                                @if (string.IsNullOrEmpty(Model.AdminNotes))
+                                {
+                                    <p class="text-muted fst-italic">No admin notes yet.</p>
+                                }
+                                else
+                                {
+                                    <div class="admin-notes">
+                                        @Html.Raw(Model.AdminNotes.Replace("\n", "<br>"))
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Actions Sidebar -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-gear"></i> Admin Actions</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Add Admin Notes Form -->
+                    <form asp-action="AddAdminNote" method="post">
+                        <input type="hidden" name="id" value="@Model.FeedbackId" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Add Admin Notes</label>
+                            <textarea name="adminNotes"
+                                      class="form-control"
+                                      rows="5"
+                                      placeholder="Enter your response or notes here...">@Model.AdminNotes</textarea>
+                            <div class="form-text">This will be visible to the user.</div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Save Notes
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <!-- Quick Actions -->
+                    <h6>Quick Actions</h6>
+                    <div class="d-grid gap-2">
+                        @if (!Model.IsRead)
+                        {
+                            <a href="#" class="btn btn-success" onclick="markAsRead(@Model.FeedbackId)">
+                                <i class="bi bi-check-circle"></i> Mark as Read
+                            </a>
+                        }
+                        <a asp-action="Delete" asp-route-id="@Model.FeedbackId" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Delete Feedback
+                        </a>
+                        <a href="mailto:@Model.User?.Email" class="btn btn-outline-primary">
+                            <i class="bi bi-envelope"></i> Email User
+                        </a>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Feedback Statistics -->
+                    <h6>Feedback Statistics</h6>
+                    <div class="list-group">
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span>User Group:</span>
+                                <strong>@Model.User?.UserGroup?.UserGroupName</strong>
+                            </div>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span>Account Created:</span>
+                                <strong>@Model.User?.CreatedDate?.ToString("dd MMM yyyy")</strong>
+                            </div>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span>Account Status:</span>
+                                <strong>
+                                    @if (Model.User?.IsActive == true)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Inactive</span>
+                                    }
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Activity -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-activity"></i> User Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-controller="UserLog"
+                           asp-action="UserActivity"
+                           asp-route-id="@Model.UserId"
+                           class="btn btn-outline-info">
+                            <i class="bi bi-clock-history"></i> View Login History
+                        </a>
+                        <a asp-controller="UserManagement"
+                           asp-action="EditUser"
+                           asp-route-id="@Model.UserId"
+                           class="btn btn-outline-warning">
+                            <i class="bi bi-person-gear"></i> Edit User Profile
+                        </a>
+                        <a asp-controller="Feedback"
+                           asp-action="AdminList"
+                           asp-route-userId="@Model.UserId"
+                           class="btn btn-outline-secondary">
+                            <i class="bi bi-chat-left-text"></i> View All Feedback
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-dismiss alerts
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+
+            // Auto-resize textarea
+            $('textarea').on('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+        });
+
+        function markAsRead(feedbackId) {
+            if (confirm('Mark this feedback as read?')) {
+                $.post('@Url.Action("MarkAsRead", "Feedback")', { id: feedbackId })
+                    .done(function() {
+                        location.reload();
+                    })
+                    .fail(function() {
+                        alert('Failed to mark as read. Please try again.');
+                    });
+            }
+        }
+    </script>
+
+    <style>
+        .feedback-message {
+            white-space: pre-wrap;
+            line-height: 1.6;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .admin-notes {
+            white-space: pre-wrap;
+            line-height: 1.6;
+            padding: 10px;
+            background-color: #e7f4e4;
+            border-left: 4px solid #28a745;
+            border-radius: 5px;
+        }
+
+        .card-header {
+            font-weight: 600;
+        }
+
+        .list-group-item {
+            border-left: none;
+            border-right: none;
+            padding: 0.75rem 0;
+        }
+
+            .list-group-item:first-child {
+                border-top: none;
+            }
+
+            .list-group-item:last-child {
+                border-bottom: none;
+            }
+    </style>
+}

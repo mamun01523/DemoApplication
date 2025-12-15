@@ -1,0 +1,391 @@
+﻿@model List<DemoApplication.Models.UserAccount.Feedback>
+
+@{
+    ViewData["Title"] = "My Feedback";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="bi bi-chat-left-text"></i> My Feedback</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item active">My Feedback</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-auto">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Submit New Feedback
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-chat-left-text" style="font-size: 3rem; color: #6c757d;"></i>
+                <h4 class="mt-3">No Feedback Submitted Yet</h4>
+                <p class="text-muted">You haven't submitted any feedback yet. Click the button below to submit your first feedback.</p>
+                <a asp-action="Create" class="btn btn-primary mt-2">
+                    <i class="bi bi-plus-circle"></i> Submit Feedback
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <!-- Feedback List -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">My Feedback History</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="accordion" id="feedbackAccordion">
+                            @foreach (var feedback in Model)
+                            {
+                                var accordionId = $"feedback_{feedback.FeedbackId}";
+                                var collapseId = $"collapse_{feedback.FeedbackId}";
+
+                                <div class="accordion-item mb-3 border rounded">
+                                    <h2 class="accordion-header" id="heading_@feedback.FeedbackId">
+                                        <button class="accordion-button @(feedback.FeedbackId != Model.First().FeedbackId ? "collapsed" : "")"
+                                                type="button"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#@collapseId"
+                                                aria-expanded="@(feedback.FeedbackId == Model.First().FeedbackId ? "true" : "false")"
+                                                aria-controls="@collapseId">
+                                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                                <div>
+                                                    <strong>@feedback.Subject</strong>
+                                                    <div class="mt-1">
+                                                        @if (!string.IsNullOrEmpty(feedback.AdminNotes))
+                                                        {
+                                                            <span class="badge bg-success me-2">
+                                                                <i class="bi bi-chat-right-text"></i> Admin Responded
+                                                            </span>
+                                                        }
+                                                        @if (feedback.IsRead)
+                                                        {
+                                                            <span class="badge bg-success">
+                                                                <i class="bi bi-check-circle"></i> Reviewed
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-warning">
+                                                                <i class="bi bi-clock"></i> Pending
+                                                            </span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <div class="text-end">
+                                                    <small class="text-muted">
+                                                        @feedback.CreatedDate.ToString("dd MMM yyyy")
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </h2>
+                                    <div id="@collapseId"
+                                         class="accordion-collapse collapse @(feedback.FeedbackId == Model.First().FeedbackId ? "show" : "")"
+                                         aria-labelledby="heading_@feedback.FeedbackId"
+                                         data-bs-parent="#feedbackAccordion">
+                                        <div class="accordion-body">
+                                            <!-- User Message -->
+                                            <div class="mb-4">
+                                                <h6 class="text-primary">
+                                                    <i class="bi bi-person-circle"></i> Your Message
+                                                </h6>
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <p class="mb-0">@Html.Raw(feedback.Message.Replace("\n", "<br>"))</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Admin Response -->
+                                            @if (!string.IsNullOrEmpty(feedback.AdminNotes))
+                                            {
+                                                <div class="mb-3">
+                                                    <h6 class="text-success">
+                                                        <i class="bi bi-shield-check"></i> Admin Response
+                                                    </h6>
+                                                    <div class="card border-success">
+                                                        <div class="card-body bg-light-success">
+                                                            <p class="mb-0">@Html.Raw(feedback.AdminNotes.Replace("\n", "<br>"))</p>
+                                                        </div>
+                                                        <div class="card-footer bg-transparent border-success text-muted">
+                                                            <small>
+                                                                <i class="bi bi-clock"></i>
+                                                                Response added by Administrator
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="alert alert-info">
+                                                    <i class="bi bi-info-circle"></i>
+                                                    No admin response yet. Your feedback is being reviewed.
+                                                </div>
+                                            }
+
+                                            <!-- Attachment -->
+                                            @if (!string.IsNullOrEmpty(feedback.ImagePath))
+                                            {
+                                                <div class="mt-3">
+                                                    <h6><i class="bi bi-image"></i> Attachment</h6>
+                                                    <div class="text-center">
+                                                        <img src="@feedback.ImagePath"
+                                                             alt="Feedback Attachment"
+                                                             class="img-thumbnail"
+                                                             style="max-height: 200px; max-width: 100%;" />
+                                                        <div class="mt-2">
+                                                            <a href="@feedback.ImagePath"
+                                                               target="_blank"
+                                                               class="btn btn-sm btn-outline-primary">
+                                                                <i class="bi bi-zoom-in"></i> View Full Size
+                                                            </a>
+                                                            <a href="@feedback.ImagePath"
+                                                               download
+                                                               class="btn btn-sm btn-outline-success">
+                                                                <i class="bi bi-download"></i> Download
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            <!-- Feedback Details -->
+                                            <div class="row mt-4 pt-3 border-top">
+                                                <div class="col-md-4">
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-calendar"></i>
+                                                        Submitted: @feedback.CreatedDate.ToString("dd MMM yyyy hh:mm tt")
+                                                    </small>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-check-circle"></i>
+                                                        Status: @(feedback.IsRead ? "Reviewed" : "Pending Review")
+                                                    </small>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-paperclip"></i>
+                                                        Attachment: @(string.IsNullOrEmpty(feedback.ImagePath) ? "None" : "Attached")
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col">
+                                <small class="text-muted">
+                                    Showing @Model.Count feedback submissions
+                                </small>
+                            </div>
+                            <div class="col-auto">
+                                <small class="text-muted">
+                                    Last updated: @DateTime.Now.ToString("dd MMM yyyy HH:mm")
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Stats -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Feedback Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                Total Submissions
+                                <span class="badge bg-primary rounded-pill">@Model.Count</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                Pending Review
+                                <span class="badge bg-warning rounded-pill">@Model.Count(f => !f.IsRead)</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                Reviewed
+                                <span class="badge bg-success rounded-pill">@Model.Count(f => f.IsRead)</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                With Responses
+                                <span class="badge bg-info rounded-pill">@Model.Count(f => !string.IsNullOrEmpty(f.AdminNotes))</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                With Attachments
+                                <span class="badge bg-secondary rounded-pill">@Model.Count(f => !string.IsNullOrEmpty(f.ImagePath))</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-lightbulb"></i> Tips for Better Feedback</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success"></i> Be specific and detailed
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success"></i> Include screenshots when helpful
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success"></i> Suggest solutions if possible
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success"></i> Use a clear subject line
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle text-success"></i> One topic per feedback
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            @foreach (var feedback in Model.Take(3))
+                            {
+                                <a href="#feedback_@feedback.FeedbackId"
+                                   class="list-group-item list-group-item-action"
+                                   onclick="scrollToFeedback(@feedback.FeedbackId)">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">@feedback.Subject</h6>
+                                        <small class="text-muted">@feedback.CreatedDate.ToString("MMM dd")</small>
+                                    </div>
+                                    <small class="text-muted">
+                                        @if (feedback.Message.Length > 50)
+                                        {
+                                            @feedback.Message.Substring(0, 50) <text>...</text>
+                                        }
+                                        else
+                                        {
+                                            @feedback.Message
+                                        }
+                                    </small>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Highlight new responses
+            $('.accordion-item').each(function() {
+                var hasResponse = $(this).find('.text-success').length > 0;
+                if (hasResponse) {
+                    $(this).addClass('border-success');
+                }
+            });
+        });
+
+        function scrollToFeedback(feedbackId) {
+            var element = document.getElementById('feedback_' + feedbackId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+                // Expand the accordion
+                var collapseElement = document.getElementById('collapse_' + feedbackId);
+                if (collapseElement) {
+                    var bsCollapse = new bootstrap.Collapse(collapseElement, {
+                        toggle: true
+                    });
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .accordion-button:not(.collapsed) {
+            background-color: #f8f9fa;
+            color: #212529;
+            box-shadow: none;
+        }
+
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: rgba(0,0,0,.125);
+        }
+
+        .bg-light-success {
+            background-color: rgba(40, 167, 69, 0.1);
+            border-left: 4px solid #28a745;
+        }
+
+        .accordion-item {
+            border: 1px solid rgba(0,0,0,.125);
+            border-radius: 0.375rem;
+        }
+
+        .list-group-item-action:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            font-size: 0.75em;
+        }
+
+        .text-muted small {
+            font-size: 0.875em;
+        }
+
+        .img-thumbnail {
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 0.25rem;
+            background-color: #fff;
+        }
+    </style>
+}

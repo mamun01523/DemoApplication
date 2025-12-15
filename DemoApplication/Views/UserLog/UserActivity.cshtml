@@ -1,0 +1,212 @@
+﻿@model IEnumerable<DemoApplication.Models.UserAccount.UserLog>
+
+
+@{
+    ViewData["Title"] = "User Activity";
+    var user = ViewBag.User;
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+else if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+else if (TempData["InfoMessage"] != null)
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        @TempData["InfoMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="container mt-4">
+
+    <h4 class="mb-3">User Activity</h4>
+
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-1">@user.FullName</h5>
+            <p class="mb-1"><strong>Username:</strong> @user.Username</p>
+            <p class="mb-0"><strong>Email:</strong> @user.Email</p>
+        </div>
+    </div>
+
+
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-2">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <small>Total Logins</small>
+                    <h4 class="mb-0">@ViewBag.TotalLogins</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6 mb-2">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <small>Active Sessions</small>
+                    <h4 class="mb-0">@ViewBag.ActiveSessions</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6 mb-2">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <small>Total Minutes</small>
+                    <h4 class="mb-0">@ViewBag.TotalSessionMinutes</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6 mb-2">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <small>Avg. Session (min)</small>
+                    <h4 class="mb-0">@Math.Round((double)ViewBag.AverageSessionMinutes, 2)</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="alert alert-info mb-4">
+        <strong>Last Login:</strong>
+        @(ViewBag.LastLogin != null
+                ? ((DateTime)ViewBag.LastLogin).ToString("dd MMM yyyy hh:mm tt")
+                : "Never")
+    </div>
+
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            Session Duration Chart
+        </div>
+        <div class="card-body">
+            <canvas id="sessionChart" height="100"></canvas>
+        </div>
+    </div>
+
+
+    <div class="card shadow-sm">
+        <div class="card-header">
+            Login History
+        </div>
+        <div class="card-body table-responsive">
+            <table id="activityTable" class="table table-bordered table-striped align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Login Time</th>
+                        <th>Logout Time</th>
+                        <th>Duration (min)</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        int i = 1;
+                        foreach (var log in Model)
+                        {
+                            <tr>
+                                <td>@i</td>
+                                <td>@log.LoginTime.ToString("dd MMM yyyy hh:mm tt")</td>
+                                <td>
+                                    @if (!log.LogoutTime.HasValue)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        @log.LogoutTime.Value.ToString("dd MMM yyyy hh:mm tt")
+                                    }
+                                </td>
+                                <td>@(log.SessionDurationMinutes ?? 0)</td>
+                                <td>@log.IpAddress</td>
+                            </tr>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">
+                                No activity found.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-3 mb-4">
+        <a asp-action="UserLog" class="btn btn-primary">Back</a>
+    </div>
+</div>
+
+
+@section Scripts {
+
+    <!-- DataTables -->
+    <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#activityTable').DataTable({
+                pageLength: 10,
+                order: [[1, 'desc']],
+                columnDefs: [{ orderable: false, targets: 0 }]
+            });
+        });
+
+        const labels = [
+            @foreach (var log in Model)
+            {
+                        <text>'@log.LoginTime.ToString("dd MMM")',</text>
+            }
+        ];
+
+        const data = [
+            @foreach (var log in Model)
+            {
+                        <text>@(log.SessionDurationMinutes ?? 0),</text>
+            }
+        ];
+
+        new Chart(document.getElementById('sessionChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Session Duration (Minutes)',
+                    data: data,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+}
